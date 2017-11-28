@@ -29,7 +29,7 @@ def _safe_get_siteid(site):
         try:
             site = Site.objects.get_current()
             siteid = site.id
-        except Exception, e:
+        except Exception as e:
             if is_site_initializing and isinstance(e, DatabaseError) and str(e).find('django_site') > -1:
                 if is_first_warn:
                     log.warn(str(e).strip())
@@ -58,7 +58,7 @@ def find_setting(group, key, site=None):
         try:
             setting = cache_get(ck)
 
-        except NotCachedError, nce:
+        except NotCachedError:
             if hasattr(apps, 'ready'):
                 app_cache_ready = apps.ready
             else:
@@ -80,7 +80,7 @@ def find_setting(group, key, site=None):
 
     else:
         grp = overrides.get(group, None)
-        if grp and grp.has_key(key):
+        if grp and key in grp:
             val = grp[key]
             setting = ImmutableSetting(key=key, group=group, value=val)
             log.debug('Returning overridden: %s', setting)
@@ -101,7 +101,7 @@ class SettingManager(models.Manager):
         return self.get_queryset()
 
     def get_queryset(self):
-    	if hasattr(super(SettingManager, self), 'get_queryset'):
+        if hasattr(super(SettingManager, self), 'get_queryset'):
             all = super(SettingManager, self).get_queryset()
         else:
             all = super(SettingManager, self).get_query_set()
@@ -168,7 +168,7 @@ class LongSettingManager(models.Manager):
         return self.get_queryset()
 
     def get_queryset(self):
-    	if hasattr(super(LongSettingManager, self), 'get_queryset'):
+        if hasattr(super(LongSettingManager, self), 'get_queryset'):
             all = super(LongSettingManager, self).get_queryset()
         else:
             all = super(LongSettingManager, self).get_query_set()

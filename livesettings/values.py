@@ -24,7 +24,8 @@ from livesettings.overrides import get_overrides
 from livesettings.utils import load_module, is_string_like, is_list_or_tuple
 import datetime
 import logging
-import signals
+from .signals import *
+import six
 
 __all__ = ['BASE_GROUP', 'ConfigurationGroup', 'Value', 'BooleanValue', 'DecimalValue', 'DurationValue',
       'FloatValue', 'IntegerValue', 'ModuleValue', 'PercentValue', 'PositiveIntegerValue', 'SortedDotDict',
@@ -95,13 +96,13 @@ class SortedDotDict(object):
         return self._dict.items()
 
     def iterkeys(self):
-        return self._dict.iterkeys()
+        return six.iterkeys(self._dict)
 
     def itervalues(self):
-        return self._dict.itervalues()
+        return six.itervalues(self._dict)
 
     def iteritems(self):
-        return self._dict.iteritems()
+        return six.iteritems(self._dict)
 
     def get(self, *args, **kwargs):
         return self._dict.get(*args, **kwargs)
@@ -240,7 +241,7 @@ class Value(object):
             self.requires = group.requires
             self.requires_value = group.requires_value
 
-        if kwargs.has_key('default'):
+        if 'default' in kwargs:
             self.default = kwargs.pop('default')
             self.use_default = True
         else:
@@ -262,7 +263,7 @@ class Value(object):
         return iter(self.value)
 
     def __unicode__(self):
-        return unicode(self.value)
+        return six.text_type(self.value)
 
     def __str__(self):
         return str(self.value)
@@ -308,13 +309,13 @@ class Value(object):
                 for x in self.choices:
                     try:
                         if x[0] == self.default or x[0] in self.default:
-                            work.append('%s' % unicode(smart_str(x[1])))
+                            work.append('%s' % six.text_type(smart_str(x[1])))
                     except TypeError:
                         continue
                 note = gettext('Default value: ') + ", ".join(work)
 
             else:
-                note = _("Default value: %s") % unicode(self.default)
+                note = _("Default value: %s") % six.text_type(self.default)
 
         return note
 
@@ -375,28 +376,28 @@ class Value(object):
             try:
                 val = self.setting.value
 
-            except SettingNotSet, sns:
+            except SettingNotSet:
                 is_setting_initializing = False
                 if self.use_default:
                     val = self.default
                     if overrides:
                         # maybe override the default
                         grp = overrides.get(self.group.key, {})
-                        if grp.has_key(self.key):
+                        if self.key in grp:
                             val = grp[self.key]
                 else:
                     val = NOTSET
 
-            except AttributeError, ae:
+            except AttributeError as ae:
                 is_setting_initializing = False
                 log.error("Attribute error: %s", ae)
                 log.error("%s: Could not get _value of %s", self.key, self.setting)
                 raise(ae)
 
-            except Exception, e:
+            except Exception as e:
                 global _WARN
                 if is_setting_initializing and isinstance(e, DatabaseError) and str(e).find("livesettings_setting") > -1:
-                    if not _WARN.has_key('livesettings_setting'):
+                    if not 'livesettings_setting' in _WARN:
                         log.warn(str(e).strip())
                         _WARN['livesettings_setting'] = True
                     log.warn('Error loading livesettings from table, OK if you are in syncdb or before it. ROLLBACK')
@@ -474,13 +475,13 @@ class Value(object):
         "Returns a value suitable for storage into a CharField"
         if value == NOTSET:
             value = ""
-        return unicode(value)
+        return six.text_type(value)
 
     def to_editor(self, value):
         "Returns a value suitable for display in a form widget"
         if value == NOTSET:
             return NOTSET  # TODO this was not a good idea for an editor: "<object object 0x123..>"
-        return unicode(value)
+        return six.text_type(value)
 
 ###############
 # VALUE TYPES #
@@ -525,7 +526,7 @@ class DecimalValue(Value):
 
         try:
             return Decimal(value)
-        except TypeError, te:
+        except TypeError as te:
             log.warning("Can't convert %s to Decimal for settings %s.%s", value, self.group.key, self.key)
             raise TypeError(te)
 
@@ -533,7 +534,7 @@ class DecimalValue(Value):
         if value == NOTSET:
             return "0"
         else:
-            return unicode(value)
+            return six.text_type(value)
 
 class DurationValue(Value):
     # DurationValue has a lot of duplication and ugliness because DurationField
@@ -571,7 +572,7 @@ class DurationValue(Value):
         if value == NOTSET:
             return NOTSET
         else:
-            return unicode(value.days * 24 * 3600 + value.seconds + float(value.microseconds) / 1000000)
+            return six.text_type(value.days * 24 * 3600 + value.seconds + float(value.microseconds) / 1000000)
 
 class FloatValue(Value):
 
@@ -590,7 +591,7 @@ class FloatValue(Value):
         if value == NOTSET:
             return "0"
         else:
-            return unicode(value)
+            return six.text_type(value)
 
 class IntegerValue(Value):
     class field(forms.IntegerField):
@@ -608,7 +609,7 @@ class IntegerValue(Value):
         if value == NOTSET:
             return "0"
         else:
-            return unicode(value)
+            return six.text_type(value)
 
 
 # Deprecated PercentValue does not work good and can not be fixed
@@ -637,13 +638,13 @@ class PercentValue(Value):
                 value = Decimal(value)
             except:
                 raise forms.ValidationError('This value must be a decimal number.')
-            return unicode(Decimal(value) / 100)
+            return six.text_type(Decimal(value) / 100)
 
         class widget(forms.TextInput):
             def render(self, name, value, attrs=None):
                 # Place a percent sign after a smaller text field
                 try:
-                    value = unicode("%.2f" % (Decimal(value) * 100))
+                    value = six.text_type("%.2f" % (Decimal(value) * 100))
                 except:
                     value = "N/A"
                 attrs['size'] = attrs['max_length'] = 6
@@ -658,7 +659,7 @@ class PercentValue(Value):
         if value == NOTSET:
             return "0"
         else:
-            return unicode(value)
+            return six.text_type(value)
 
 
 class PositiveIntegerValue(IntegerValue):
@@ -682,7 +683,7 @@ class StringValue(Value):
     def to_python(self, value):
         if value == NOTSET:
             value = ""
-        return unicode(value)
+        return six.text_type(value)
 
     to_editor = to_python
 
@@ -737,7 +738,7 @@ class LongStringValue(Value):
     def to_python(self, value):
         if value == NOTSET:
             value = ""
-        return unicode(value)
+        return six.text_type(value)
 
     to_editor = to_python
 

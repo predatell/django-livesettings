@@ -694,7 +694,7 @@ class WebClientPostTest(TestCase):
             config_register(value)
             response = self.client.get('/settings/')
             html_value = extract_val(response.content)
-            # print '%s "%s"' % (type_name, html_value)
+            # print('%s "%s"' % (type_name, html_value))
             response = self.client.post('/settings/', {'Group2__SingleItem': ''})  # See in the traceback a line one level Up
             if reject_empty:
                 # option reject_empty had been tested before all Value types were fixed to be similar accepting empty value
@@ -704,7 +704,7 @@ class WebClientPostTest(TestCase):
                 self.assertRedirects(response, '/settings/')
                 response = self.client.get('/settings/')
                 html_value = extract_val(response.content)
-                # print '%s "%s" "%s" "%s"' % (type_name, html_value, value.value, get_setting_like_in_db(value))
+                # print('%s "%s" "%s" "%s"' % (type_name, html_value, value.value, get_setting_like_in_db(value)))
                 # self.assertNotContains(response, '&lt;object object at 0x[0-9a-f]+&gt;')  # rendered NOTSET = object()
                 # if re.search('SingleItem.*value="', response.content):
                 #    self.assertTrue(re.search('SingleItem.*value="([0.]*|\[\])"', response.content))

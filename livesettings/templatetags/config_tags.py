@@ -4,6 +4,7 @@ from django.core import urlresolvers
 from livesettings.functions import config_value
 from livesettings.utils import url_join
 import logging
+import six
 
 log = logging.getLogger('configuration.config_tags')
 
@@ -33,7 +34,7 @@ def break_at(value,  chars=40):
     """Force spaces into long lines which don't have spaces"""
 
     chars = int(chars)
-    value = unicode(value)
+    value = six.text_type(value)
     if len(value) < chars:
         return value
     else:

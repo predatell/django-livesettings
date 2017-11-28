@@ -2,6 +2,9 @@ import sys
 import types
 import os
 
+from six.moves import reduce
+
+
 def can_loop_over(maybe):
     """Test value to see if it is list like"""
     try:
