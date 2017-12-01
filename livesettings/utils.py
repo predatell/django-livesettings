@@ -15,7 +15,7 @@ def can_loop_over(maybe):
         return 1
 
 def is_list_or_tuple(maybe):
-    return isinstance(maybe, (types.TupleType, types.ListType))
+    return isinstance(maybe, (tuple, list))
 
 
 def is_scalar(maybe):
