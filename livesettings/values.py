@@ -24,7 +24,7 @@ from livesettings.overrides import get_overrides
 from livesettings.utils import load_module, is_string_like, is_list_or_tuple
 import datetime
 import logging
-from .signals import *
+from . import signals
 import six
 
 __all__ = ['BASE_GROUP', 'ConfigurationGroup', 'Value', 'BooleanValue', 'DecimalValue', 'DurationValue',
