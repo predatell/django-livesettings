@@ -168,8 +168,11 @@ class ConfigurationGroup(SortedDotDict):
 
         super(ConfigurationGroup, self).__init__(*args, **kwargs)
 
-    def __cmp__(self, other):
-        return cmp((self.ordering, self.name), (other.ordering, other.name))
+    def __lt__(self, other):
+        if self.ordering < other.ordering:
+            return True
+        elif self.ordering == other.ordering:
+            return self.name < other.name
 
     def __eq__(self, other):
         return (type(self) == type(other)
@@ -250,9 +253,15 @@ class Value(object):
         self.creation_counter = Value.creation_counter
         Value.creation_counter += 1
 
-    def __cmp__(self, other):
-        return cmp((self.ordering, self.description, self.creation_counter), (other.ordering, other.description, other.creation_counter))
-
+    def __lt__(self, other):
+        if self.ordering < other.ordering:
+            return True
+        elif self.ordering == other.ordering:
+            if self.description < other.description:
+                return True
+            elif self.description == other.description:
+                return self.creation_counter < other.creation_counter
+            
     def __eq__(self, other):
         if type(self) == type(other):
             return self.value == other.value
