@@ -18,7 +18,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import connection, DatabaseError
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext, ugettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 from livesettings.models import find_setting, LongSetting, Setting, SettingNotSet
 from livesettings.overrides import get_overrides
 from livesettings.utils import load_module, is_string_like, is_list_or_tuple
